@@ -14,8 +14,12 @@ public:
 	typedef const T&    const_reference;
 	typedef size_t      size_type;
 	typedef ptrdiff_t   difference_type;
+    template< typename U > struct rebind { typedef MemoryPool<U> other; };
 
     MemoryPool() noexcept;
+    MemoryPool(const MemoryPool& memoryPool) noexcept;
+    MemoryPool(MemoryPool&& memoryPool) noexcept;
+    template <class U> MemoryPool(const MemoryPool<U>& memoryPool) noexcept;
     ~MemoryPool() noexcept;
 
 	pointer allocate(size_type size = 1);

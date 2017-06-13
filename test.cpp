@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdlib>
+#include "mempool.h"
 
 #define INT 1
 #define FLOAT 2
@@ -35,31 +36,31 @@ template<class T>
 class vecWrapperT : public vecWrapper
 {
 public:
-	vecWrapperT(int type, std::vector<T, std::allocator<T> > *pVec) 
+	vecWrapperT(int type, std::vector<T, MemoryPool<T> > *pVec) 
 	{ 
 		m_type = type;
 		m_pVec = pVec;
 	}
 	virtual ~vecWrapperT() {
 		if (m_pVec)
-			delete ((std::vector<T, std::allocator<T> > *)m_pVec);
+			delete ((std::vector<T, MemoryPool<T> > *)m_pVec);
 	}
 public:
 	virtual void visit(int index)
 	{
-		T temp = (*(std::vector<T, std::allocator<T> > *)m_pVec)[index];
+		T temp = (*(std::vector<T, MemoryPool<T> > *)m_pVec)[index];
 	}
 	virtual int size()
 	{
-		return ((std::vector<T, std::allocator<T> > *)m_pVec)->size();
+		return ((std::vector<T, MemoryPool<T> > *)m_pVec)->size();
 	}
 	virtual void resize(int size)
 	{
-		((std::vector<T, std::allocator<T> > *)m_pVec)->resize(size);
+		((std::vector<T, MemoryPool<T> > *)m_pVec)->resize(size);
 	}
 	virtual bool checkElement(int index, void *pValue)
 	{
-		T temp = (*(std::vector<T, std::allocator<T> > *)m_pVec)[index];
+		T temp = (*(std::vector<T, MemoryPool<T> > *)m_pVec)[index];
 		if (temp == (*((T *)pValue)))
 			return true;
 		else
@@ -68,7 +69,7 @@ public:
 
 	virtual void setElement(int index, void *value)
 	{
-		(*(std::vector<T, std::allocator<T> > *)m_pVec)[index] = *((T *)value);
+		(*(std::vector<T, MemoryPool<T> > *)m_pVec)[index] = *((T *)value);
 	}
 };
 
@@ -90,7 +91,7 @@ protected:
 	int m_Y;
 };
 
-#define TESTSIZE 10000
+#define TESTSIZE 100
 
 int main()
 {
@@ -102,14 +103,14 @@ int main()
 	for (int i = 0; i < TESTSIZE - 4; i++)
 	{
 		tSize = (int)((float)rand()/(float)RAND_MAX * 10000);
-		vecWrapperT<int> *pNewVec = new vecWrapperT<int>(INT, new std::vector<int, std::allocator<int> >(tSize));
+		vecWrapperT<int> *pNewVec = new vecWrapperT<int>(INT, new std::vector<int, MemoryPool<int> >(tSize));
 		testVec[i] = (vecWrapper *)pNewVec;
 	}
 
 	for (int i = 0; i < 4; i++)
 	{
 		tSize = (int)((float)rand() / (float)RAND_MAX * 10000);
-		vecWrapperT<myObject> *pNewVec = new vecWrapperT<myObject>(CLASS, new std::vector<myObject, std::allocator<myObject> >(tSize));
+		vecWrapperT<myObject> *pNewVec = new vecWrapperT<myObject>(CLASS, new std::vector<myObject, MemoryPool<myObject> >(tSize));
 		testVec[TESTSIZE - 4 + i] = (vecWrapper *)pNewVec;
 	}
 	

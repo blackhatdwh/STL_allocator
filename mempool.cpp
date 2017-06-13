@@ -13,6 +13,26 @@ MemoryPool<T>::MemoryPool() noexcept{
     slot_size = (((object_size - 1) / 8) + 1) * 8;
 }
 
+template <typename T>
+MemoryPool<T>::MemoryPool(const MemoryPool& memoryPool) noexcept : MemoryPool(){}
+
+template <typename T>
+MemoryPool<T>::MemoryPool(MemoryPool&& memoryPool)
+noexcept {
+  current_block = memoryPool.current_block;
+  memoryPool.current_block = nullptr;
+  current_slot = memoryPool.current_slot;
+  last_slot = memoryPool.last_slot;
+  free_list = memoryPool.free_list;
+  slot_size = memoryPool.slot_size;
+}
+
+template <typename T>
+template<class U>
+MemoryPool<T>::MemoryPool(const MemoryPool<U>& memoryPool)
+noexcept :
+MemoryPool()
+{}
 
 template <typename T>
 MemoryPool<T>::~MemoryPool() noexcept{
@@ -36,6 +56,17 @@ MemoryPool<T>::address(const_reference x)
 const noexcept{
     return &x;
 }
+
+
+template <typename T>
+inline typename MemoryPool<T>::size_type
+MemoryPool<T>::max_size()
+const noexcept
+{
+  size_type maxBlocks = -1 / BLOCKSIZE;
+  return maxBlocks;
+}
+
 
 template <typename T>
 inline typename MemoryPool<T>::pointer
@@ -71,4 +102,25 @@ MemoryPool<T>::allocateBlock(){
     *reinterpret_cast<ptr2slot_pointer>(new_block) = current_block;     // set the link information
     current_block = new_block;
     last_slot = new_block + BLOCKSIZE - slot_size + 1;
+}
+
+
+
+
+template <typename T>
+template <class U, class... Args>
+inline void
+MemoryPool<T>::construct(U* p, Args&&... args)
+{
+  new (p) U (std::forward<Args>(args)...);
+}
+
+
+
+template <typename T>
+template <class U>
+inline void
+MemoryPool<T>::destroy(U* p)
+{
+  p->~U();
 }
