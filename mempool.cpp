@@ -18,7 +18,7 @@ template <typename T>
 MemoryPool<T>::~MemoryPool() noexcept{
     while(current_block){
         slot_pointer temp = current_block;
-        current_block = *reinterpret_cast<ptr2slot_pointer>(current_slot);
+        current_block = *reinterpret_cast<ptr2slot_pointer>(current_block);
         free(temp);
     }
 }
