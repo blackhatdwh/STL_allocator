@@ -63,7 +63,7 @@ inline typename MemoryPool<T>::size_type
 MemoryPool<T>::max_size()
 const noexcept
 {
-  size_type maxBlocks = -1 / BLOCKSIZE;
+  size_type maxBlocks = -1 / (size_type)BLOCKSIZE;
   return maxBlocks;
 }
 
