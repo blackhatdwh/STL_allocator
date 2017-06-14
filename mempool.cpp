@@ -84,8 +84,10 @@ MemoryPool<T>::allocate(size_type size){
         if(class_layer[layer].current_slot >= class_layer[layer].last_slot){
             Mount(layer);
         }
-        slot_pointer result = class_layer[layer].current_slot + sizeof(slot_pointer);
+        slot_pointer result = class_layer[layer].current_slot;
+        *(reinterpret_cast<int*>(result)) = layer;
         class_layer[layer].current_slot += class_layer[layer].slot_size;
+        result += sizeof(slot_pointer);
         return reinterpret_cast<pointer>(result);
     }
 
