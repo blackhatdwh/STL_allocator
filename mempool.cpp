@@ -1,24 +1,20 @@
 #include <iostream>
 #include <cstdlib>
 
+
 using namespace std;
 
-Layer::Layer(){
-    current_block = nullptr;
-    current_slot = nullptr;
-    last_slot = nullptr;
-    free_list = nullptr;
-    slot_size = 0;
+long long int trace = 0;
+
+Block::Block(size_t size){
+    next = nullptr;
+    block = (char*)malloc(size);
+    id = 12345;
+    cout ;
 }
 
-Layer::~Layer(){
-    for(int i = 0; i < LAYER; i++){
-        while(class_layer[i].current_block){
-            slot_pointer temp = class_layer[i].current_block;
-            class_layer[i].current_block = *reinterpret_cast<ptr2slot_pointer>(class_layer[i].current_block);
-            free(temp);
-        }
-    }
+Block::~Block(){
+    free(block);
 }
 
 template <typename T>
@@ -62,6 +58,7 @@ const noexcept
 }
 
 
+
 template <typename T>
 inline typename MemoryPool<T>::pointer
 MemoryPool<T>::allocate(size_type size){
@@ -70,27 +67,12 @@ MemoryPool<T>::allocate(size_type size){
         return (pointer)malloc(size);
     }
     int layer = (size - 1) / GAP;
-    // if free_list is available, use it
-    if(class_layer[layer].free_list != nullptr){
-        pointer result = reinterpret_cast<pointer>(class_layer[layer].free_list);
-        class_layer[layer].free_list = *reinterpret_cast<ptr2slot_pointer>(class_layer[layer].free_list);
-        // store which layer does this slot belong to
-        *(reinterpret_cast<int*>(result)) = layer;
-        // skip the information section
-        slot_pointer final_result = reinterpret_cast<slot_pointer>(result) + sizeof(slot_pointer);
-        return reinterpret_cast<pointer>(final_result);
+    if(free_list[layer] == nullptr){
+        Mount(layer);
     }
-    else{
-        if(class_layer[layer].current_slot >= class_layer[layer].last_slot){
-            Mount(layer);
-        }
-        slot_pointer result = class_layer[layer].current_slot;
-        *(reinterpret_cast<int*>(result)) = layer;
-        class_layer[layer].current_slot += class_layer[layer].slot_size;
-        result += sizeof(slot_pointer);
-        return reinterpret_cast<pointer>(result);
-    }
-
+    T* result = (T*)(free_list[layer]->block);
+    free_list[layer] = (*free_list[layer]).next;
+    return result;
 }
 
 template <typename T>
@@ -101,30 +83,23 @@ MemoryPool<T>::deallocate(pointer trash, size_type size){
         free(trash);
         return;
     }
-    // retrieve the skipped information section
-    slot_pointer recycle = reinterpret_cast<slot_pointer>(trash) - sizeof(slot_pointer);
-    // figure out which layer does it belong to
-    int layer = *reinterpret_cast<int*>(recycle);
-    // create link
-    *reinterpret_cast<ptr2slot_pointer>(recycle) = class_layer[layer].free_list;
-    class_layer[layer].free_list = recycle;
+    else{
+        Block* recycle = (Block*)trash;
+        int layer = (size - 1) / GAP;
+        recycle->next = free_list[layer];
+        free_list[layer] = recycle;
+    }
 }
 
 template <typename T>
 inline void
 MemoryPool<T>::Mount(int layer){
-    // the size of one memory slot
-    // + sizeof(slot_pointer) means add a space at the beginning of the slot, showing which layer it comes from
-    class_layer[layer].slot_size = sizeof(slot_pointer) + GAP * (layer + 1);
-    // + sizeof(slot_pointer) means add a slot_pointer at the beginning of the chunk, used to point to the next chunk
-    slot_pointer new_block = (slot_pointer)malloc(sizeof(slot_pointer) + CHAIN_LENGTH * class_layer[layer].slot_size);
-    // allocate start from the head of the new chunk (the first slot_pointer was skipped)
-    class_layer[layer].current_slot = new_block + sizeof(slot_pointer);
-    // set up the link between chunks
-    *reinterpret_cast<ptr2slot_pointer>(new_block) = class_layer[layer].current_block;
-    class_layer[layer].current_block = new_block;
-    // the last slot is here:
-    class_layer[layer].last_slot = new_block + sizeof(slot_pointer) + (CHAIN_LENGTH - 1) * class_layer[layer].slot_size + 1;
+    for (int i = 0; i < CHAIN_LENGTH; i++){
+        Block* temp = new Block(GAP * (layer + 1));
+        temp->id = trace++;
+        temp->next = free_list[layer];
+        free_list[layer] = temp;
+    }
 }
 
 
