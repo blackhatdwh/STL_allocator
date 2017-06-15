@@ -1,17 +1,28 @@
 #include <iostream>
 #include <cstdlib>
-#define CHAIN_LENGTH 20
-#define GAP 2000
-#define LAYER 20
-#define MAX_SIZE GAP*LAYER
-// GAP * LAYER = 40000
 
 using namespace std;
 
+Layer::Layer(){
+    current_block = nullptr;
+    current_slot = nullptr;
+    last_slot = nullptr;
+    free_list = nullptr;
+    slot_size = 0;
+}
+
+Layer::~Layer(){
+    for(int i = 0; i < LAYER; i++){
+        while(class_layer[i].current_block){
+            slot_pointer temp = class_layer[i].current_block;
+            class_layer[i].current_block = *reinterpret_cast<ptr2slot_pointer>(class_layer[i].current_block);
+            free(temp);
+        }
+    }
+}
 
 template <typename T>
 MemoryPool<T>::MemoryPool() noexcept{
-    class_layer = new Layer[LAYER];
 }
 
 template <typename T>
@@ -25,17 +36,6 @@ noexcept :
 MemoryPool()
 {}
 
-template <typename T>
-MemoryPool<T>::~MemoryPool() noexcept{
-    for(int i = 0; i < LAYER; i++){
-        while(class_layer[i].current_block){
-            slot_pointer temp = class_layer[i].current_block;
-            class_layer[i].current_block = *reinterpret_cast<ptr2slot_pointer>(class_layer[i].current_block);
-            free(temp);
-        }
-    }
-    delete[] class_layer;
-}
 
 template <typename T>
 inline typename MemoryPool<T>::pointer
@@ -115,7 +115,7 @@ inline void
 MemoryPool<T>::Mount(int layer){
     // the size of one memory slot
     // + sizeof(slot_pointer) means add a space at the beginning of the slot, showing which layer it comes from
-    class_layer[layer].Set_Slot_Size(sizeof(slot_pointer) + GAP * (layer + 1));
+    class_layer[layer].slot_size = sizeof(slot_pointer) + GAP * (layer + 1);
     // + sizeof(slot_pointer) means add a slot_pointer at the beginning of the chunk, used to point to the next chunk
     slot_pointer new_block = (slot_pointer)malloc(sizeof(slot_pointer) + CHAIN_LENGTH * class_layer[layer].slot_size);
     // allocate start from the head of the new chunk (the first slot_pointer was skipped)
