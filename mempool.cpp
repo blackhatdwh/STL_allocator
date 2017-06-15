@@ -25,7 +25,6 @@ noexcept :
 MemoryPool()
 {}
 
-//TODO
 template <typename T>
 MemoryPool<T>::~MemoryPool() noexcept{
     for(int i = 0; i < LAYER; i++){
@@ -66,6 +65,7 @@ const noexcept
 template <typename T>
 inline typename MemoryPool<T>::pointer
 MemoryPool<T>::allocate(size_type size){
+    size = sizeof(value_type) * size;
     if(size > MAX_SIZE){
         return (pointer)malloc(size);
     }
