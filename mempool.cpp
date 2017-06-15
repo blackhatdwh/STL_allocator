@@ -96,6 +96,7 @@ MemoryPool<T>::allocate(size_type size){
 template <typename T>
 inline void
 MemoryPool<T>::deallocate(pointer trash, size_type size){
+    size = size * sizeof(value_type);
     if(size > MAX_SIZE){
         free(trash);
         return;
