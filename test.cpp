@@ -2,6 +2,7 @@
 //
 
 #include <vector>
+#include <ctime>
 #include <iostream>
 #include <cstdlib>
 #include "mempool.h"
@@ -91,10 +92,15 @@ protected:
 	int m_Y;
 };
 
-#define TESTSIZE 100
+#define TESTSIZE 10000
 
 int main()
 {
+    std::clock_t start;
+    double duration;
+
+    start = std::clock();
+
 	vecWrapper **testVec;
 	testVec = new vecWrapper*[TESTSIZE];
 
@@ -102,14 +108,14 @@ int main()
 	//test allocator
 	for (int i = 0; i < TESTSIZE - 4; i++)
 	{
-		tSize = (int)((float)rand()/(float)RAND_MAX * 10000);
+		tSize = (int)((float)rand()/(float)RAND_MAX * TESTSIZE);
 		vecWrapperT<int> *pNewVec = new vecWrapperT<int>(INT, new std::vector<int, MemoryPool<int> >(tSize));
 		testVec[i] = (vecWrapper *)pNewVec;
 	}
 
 	for (int i = 0; i < 4; i++)
 	{
-		tSize = (int)((float)rand() / (float)RAND_MAX * 10000);
+		tSize = (int)((float)rand() / (float)RAND_MAX * TESTSIZE);
 		vecWrapperT<myObject> *pNewVec = new vecWrapperT<myObject>(CLASS, new std::vector<myObject, MemoryPool<myObject> >(tSize));
 		testVec[TESTSIZE - 4 + i] = (vecWrapper *)pNewVec;
 	}
@@ -117,8 +123,8 @@ int main()
 	//test resize
 	for (int i = 0; i < 100; i++)
 	{
-		tIndex = (int)((float)rand() / (float)RAND_MAX * 10000);
-		tSize = (int)((float)rand() / (float)RAND_MAX * 10000);
+		tIndex = (int)((float)rand() / (float)RAND_MAX * TESTSIZE);
+		tSize = (int)((float)rand() / (float)RAND_MAX * TESTSIZE);
 		testVec[tIndex]->resize(tSize);
 	}
 
@@ -139,6 +145,9 @@ int main()
 		delete testVec[i];
 
 	delete []testVec;
+	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+    std::cout<<"printf: "<< duration <<'\n';
 
     return 0;
 }
