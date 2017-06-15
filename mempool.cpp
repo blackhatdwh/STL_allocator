@@ -77,8 +77,8 @@ MemoryPool<T>::allocate(size_type size){
         // store which layer does this slot belong to
         *(reinterpret_cast<int*>(result)) = layer;
         // skip the information section
-        result += sizeof(slot_pointer);
-        return result;
+        slot_pointer final_result = reinterpret_cast<slot_pointer>(result) + sizeof(slot_pointer);
+        return reinterpret_cast<pointer>(final_result);
     }
     else{
         if(class_layer[layer].current_slot >= class_layer[layer].last_slot){
