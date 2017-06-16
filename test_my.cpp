@@ -37,31 +37,31 @@ template<class T>
 class vecWrapperT : public vecWrapper
 {
 public:
-	vecWrapperT(int type, std::vector<T, std::allocator<T> > *pVec) 
+	vecWrapperT(int type, std::vector<T, Allocator<T> > *pVec) 
 	{ 
 		m_type = type;
 		m_pVec = pVec;
 	}
 	virtual ~vecWrapperT() {
 		if (m_pVec)
-			delete ((std::vector<T, std::allocator<T> > *)m_pVec);
+			delete ((std::vector<T, Allocator<T> > *)m_pVec);
 	}
 public:
 	virtual void visit(int index)
 	{
-		T temp = (*(std::vector<T, std::allocator<T> > *)m_pVec)[index];
+		T temp = (*(std::vector<T, Allocator<T> > *)m_pVec)[index];
 	}
 	virtual int size()
 	{
-		return ((std::vector<T, std::allocator<T> > *)m_pVec)->size();
+		return ((std::vector<T, Allocator<T> > *)m_pVec)->size();
 	}
 	virtual void resize(int size)
 	{
-		((std::vector<T, std::allocator<T> > *)m_pVec)->resize(size);
+		((std::vector<T, Allocator<T> > *)m_pVec)->resize(size);
 	}
 	virtual bool checkElement(int index, void *pValue)
 	{
-		T temp = (*(std::vector<T, std::allocator<T> > *)m_pVec)[index];
+		T temp = (*(std::vector<T, Allocator<T> > *)m_pVec)[index];
 		if (temp == (*((T *)pValue)))
 			return true;
 		else
@@ -70,7 +70,7 @@ public:
 
 	virtual void setElement(int index, void *value)
 	{
-		(*(std::vector<T, std::allocator<T> > *)m_pVec)[index] = *((T *)value);
+		(*(std::vector<T, Allocator<T> > *)m_pVec)[index] = *((T *)value);
 	}
 };
 
@@ -98,6 +98,10 @@ int main()
 {
     std::clock_t start;
     double duration;
+    Allocator<int> a;
+    for(int i = 0; i < LAYER; i++)
+        a.Mount(i);
+
 
     start = std::clock();
 
@@ -109,7 +113,7 @@ int main()
 	for (int i = 0; i < TESTSIZE - 4; i++)
 	{
 		tSize = (int)((float)rand()/(float)RAND_MAX * TESTSIZE);
-		vecWrapperT<int> *pNewVec = new vecWrapperT<int>(INT, new std::vector<int, std::allocator<int> >(tSize));
+		vecWrapperT<int> *pNewVec = new vecWrapperT<int>(INT, new std::vector<int, Allocator<int> >(tSize));
 		testVec[i] = (vecWrapper *)pNewVec;
 	}
 
@@ -117,7 +121,7 @@ int main()
 	for (int i = 0; i < 4; i++)
 	{
 		tSize = (int)((float)rand() / (float)RAND_MAX * TESTSIZE);
-		vecWrapperT<myObject> *pNewVec = new vecWrapperT<myObject>(CLASS, new std::vector<myObject, std::allocator<myObject> >(tSize));
+		vecWrapperT<myObject> *pNewVec = new vecWrapperT<myObject>(CLASS, new std::vector<myObject, Allocator<myObject> >(tSize));
 		testVec[TESTSIZE - 4 + i] = (vecWrapper *)pNewVec;
 	}
 	
@@ -148,6 +152,8 @@ int main()
 	delete []testVec;
 	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     std::cout<<"printf: "<< duration <<'\n';
+    for(int i = 0; i < LAYER; i++)
+        a.Free(i);
 
     return 0;
 }

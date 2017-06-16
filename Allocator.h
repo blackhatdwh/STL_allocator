@@ -12,7 +12,7 @@ char* free_list[LAYER];
 
 
 template <typename T>
-class MemoryPool{
+class Allocator{
 public:
 	typedef T           value_type;
 	typedef T*          pointer;
@@ -21,23 +21,18 @@ public:
 	typedef const T&    const_reference;
 	typedef size_t      size_type;
 	typedef ptrdiff_t   difference_type;
-    template< typename U > struct rebind { typedef MemoryPool<U> other; };
+    template< typename U > struct rebind { typedef Allocator<U> other; };
 
-    //MemoryPool() noexcept;
-    //MemoryPool(const MemoryPool& memoryPool) noexcept;
-    //MemoryPool(MemoryPool&& memoryPool) noexcept;
-    //template <class U> MemoryPool(const MemoryPool<U>& memoryPool) noexcept;
 
 	pointer allocate(size_type size = 1);
 	void deallocate(pointer trash, size_type size = 1);
     size_type max_size() const noexcept;
 	pointer address(reference x) const noexcept;
 	const_pointer address(const_reference x) const noexcept;
-    //template <class U, class... Args> void construct(U* p, Args&&... args);
-    //template <class U> void destroy(U* p);
 
 
-    void Mount(int layer);
+    void Mount(int layer);      // mount blocks on given layer
+    void Free(int layer);       // free all blocks on given layer
 
 };
-#include"mempool.cpp"
+#include"Allocator.cpp"
