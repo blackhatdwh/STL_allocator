@@ -6,16 +6,6 @@ using namespace std;
 
 long long int trace = 0;
 
-Block::Block(size_t size){
-    next = nullptr;
-    block = (char*)malloc(size);
-    id = 12345;
-    cout ;
-}
-
-Block::~Block(){
-    free(block);
-}
 
 template <typename T>
 MemoryPool<T>::MemoryPool() noexcept{
@@ -70,8 +60,8 @@ MemoryPool<T>::allocate(size_type size){
     if(free_list[layer] == nullptr){
         Mount(layer);
     }
-    T* result = (T*)(free_list[layer]->block);
-    free_list[layer] = (*free_list[layer]).next;
+    T* result = (T*)(free_list[layer] + sizeof(char*));
+    free_list[layer] = *(reinterpret_cast<char**>(free_list[layer]));
     return result;
 }
 
@@ -84,9 +74,9 @@ MemoryPool<T>::deallocate(pointer trash, size_type size){
         return;
     }
     else{
-        Block* recycle = (Block*)trash;
+        char* recycle = (char*)trash - sizeof(char*);
         int layer = (size - 1) / GAP;
-        recycle->next = free_list[layer];
+        *(reinterpret_cast<char**>(recycle)) = free_list[layer];
         free_list[layer] = recycle;
     }
 }
@@ -95,10 +85,9 @@ template <typename T>
 inline void
 MemoryPool<T>::Mount(int layer){
     for (int i = 0; i < CHAIN_LENGTH; i++){
-        Block* temp = new Block(GAP * (layer + 1));
-        temp->id = trace++;
-        temp->next = free_list[layer];
-        free_list[layer] = temp;
+        char* new_block = (char*)malloc(sizeof(char*) + GAP * (layer + 1));
+        *(reinterpret_cast<char**>(new_block)) = free_list[layer];
+        free_list[layer] = new_block;
     }
 }
 

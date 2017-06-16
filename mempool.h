@@ -1,24 +1,14 @@
 #include <iostream>
 #include <cstdlib>
 #define CHAIN_LENGTH 10000
-#define GAP 4000
-#define LAYER 10
+#define GAP 2000
+#define LAYER 20
 #define MAX_SIZE GAP*LAYER
 // GAP * LAYER = 40000
 using namespace std;
 
-class Block{
-public:
-    Block(size_t size);
-    ~Block();
 
-    char* block;
-    Block* next;
-    long long int id;
-};
-
-Block* free_list[LAYER];
-
+char* free_list[LAYER];
 
 
 template <typename T>
