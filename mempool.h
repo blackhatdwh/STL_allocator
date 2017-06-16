@@ -23,18 +23,18 @@ public:
 	typedef ptrdiff_t   difference_type;
     template< typename U > struct rebind { typedef MemoryPool<U> other; };
 
-    MemoryPool() noexcept;
-    MemoryPool(const MemoryPool& memoryPool) noexcept;
-    MemoryPool(MemoryPool&& memoryPool) noexcept;
-    template <class U> MemoryPool(const MemoryPool<U>& memoryPool) noexcept;
+    //MemoryPool() noexcept;
+    //MemoryPool(const MemoryPool& memoryPool) noexcept;
+    //MemoryPool(MemoryPool&& memoryPool) noexcept;
+    //template <class U> MemoryPool(const MemoryPool<U>& memoryPool) noexcept;
 
 	pointer allocate(size_type size = 1);
 	void deallocate(pointer trash, size_type size = 1);
     size_type max_size() const noexcept;
 	pointer address(reference x) const noexcept;
 	const_pointer address(const_reference x) const noexcept;
-    template <class U, class... Args> void construct(U* p, Args&&... args);
-    template <class U> void destroy(U* p);
+    //template <class U, class... Args> void construct(U* p, Args&&... args);
+    //template <class U> void destroy(U* p);
 
 
     void Mount(int layer);
